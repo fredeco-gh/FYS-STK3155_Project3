@@ -1,20 +1,25 @@
+from __future__ import annotations
 import torch
 from torch import nn
+from core.interfaces import AnsatzFactor,Potential
 from core.neural_network import FeedForwardNN
-from schrodinger_box.time_independent_1d import Schrodinger1DTimeIndependentPINN, LossTISE1D
+from schrodinger_box.time_independent_1d import Schrodinger1DTimeIndependentPINN, LossTISE1D, ansatzfactor_1Dbox
 from torch.utils.data import DataLoader
 
 def train_tise_example(
     L: float = 1.0,
     n_epochs: int = 5000,
     N_samples: int = 256,
+    E: float = 0.5,
     hidden_layers: int = 3,
     width: int = 64,
     lambd: float = 0.0,
     lr: float = 1e-3,
     batch_size: int = 16,
+    ansatz_factor: "AnsatzFactor" = ansatzfactor_1Dbox,
+    potential: "Potential" | None = None,
+    step_method: str = "Adam", 
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
-    step_method: str = "Adam"
 ):
     x = torch.linspace(-L,L,256)
     input_loader = DataLoader(x, batch_size=batch_size, shuffle=True)
@@ -28,10 +33,10 @@ def train_tise_example(
         width=width,
         activation_func=nn.Tanh,
     ).to(device)
-    pinn = Schrodinger1DTimeIndependentPINN(model, L=L, E_init=5.0).to(device)
+    pinn = Schrodinger1DTimeIndependentPINN(model, ansatz_factor = ansatz_factor, L=L, E = E).to(device)
 
     # Define loss
-    total_loss_fn = LossTISE1D()
+    total_loss_fn = LossTISE1D(potential)
 
     # Define optimizer
     
@@ -42,12 +47,18 @@ def train_tise_example(
 
     # Train the model
     for epoch in range(1, n_epochs + 1):
-
+        epoch_loss = 0
         for batch in input_loader: 
             optimizer.zero_grad()
-            loss = total_loss_fn(pinn, batch)
+            loss = total_loss_fn(pinn, batch.view(-1, 1))
             loss.backward()
             optimizer.step()
+
+            epoch_loss += loss
+        
+        if epoch % 100 == 0:
+            print(f"Epoch {epoch}/{n_epochs}. Loss={epoch_loss}...", end="\r")
+        
 
     # After training, return model and energy
     return pinn

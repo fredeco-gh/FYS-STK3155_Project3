@@ -53,10 +53,11 @@ class CompositePhysicsLoss(PhysicsLoss):
     def __add__(self, other: PhysicsLoss) -> CompositePhysicsLoss:
         return CompositePhysicsLoss(*self.losses, other)
 
+AnsatzFactor = Callable[[torch.Tensor, PINN], torch.Tensor]
 
 class PhysicsInformedNN(ABC, torch.nn.Module):
     """Base class for physics-informed neural networks."""
-    def __init__(self, model: torch.nn.Module, ansatz_factor: Callable[[torch.Tensor], torch.Tensor]):
+    def __init__(self, model: torch.nn.Module, ansatz_factor: AnsatzFactor):
         super().__init__()
         self.model = model
         self.ansatz_factor = ansatz_factor
