@@ -2,7 +2,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, asdict, fields
-from typing import TypeVar, Generic, Any
+from typing import Callable, TypeVar, Generic, Any
 import torch
 import copy
 
@@ -35,6 +35,11 @@ class PhysicsLoss(Generic[PINN], ABC):
     def __rmul__(self, scalar: float) -> PhysicsLoss:
         return self.__mul__(scalar)
 
+class Potential(Generic[PINN], ABC):
+    @abstractmethod
+    def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
+        pass
+
 class CompositePhysicsLoss(PhysicsLoss):
     """Composite loss that aggregates multiple PhysicsLoss components."""
     def __init__(self, *losses: PhysicsLoss):
@@ -49,12 +54,12 @@ class CompositePhysicsLoss(PhysicsLoss):
         return CompositePhysicsLoss(*self.losses, other)
 
 
-
 class PhysicsInformedNN(ABC, torch.nn.Module):
     """Base class for physics-informed neural networks."""
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, ansatz_factor: Callable[[torch.Tensor], torch.Tensor]):
         super().__init__()
         self.model = model
+        self.ansatz_factor = ansatz_factor
 
     @abstractmethod
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
