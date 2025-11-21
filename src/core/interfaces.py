@@ -19,6 +19,7 @@ class PhysicsLoss(Generic[PINN], ABC):
     def __init__(self) -> None:
         super().__init__()
         self.weight: float = 1.0
+        self.weight_norm = 0.0004
     
     @abstractmethod
     def __call__(self, pinn: PINN, inputs: torch.Tensor) -> torch.Tensor:
@@ -57,7 +58,7 @@ AnsatzFactor = Callable[[torch.Tensor, PINN], torch.Tensor]
 
 class PhysicsInformedNN(ABC, torch.nn.Module):
     """Base class for physics-informed neural networks."""
-    def __init__(self, model: torch.nn.Module, ansatz_factor: AnsatzFactor):
+    def __init__(self, model: torch.nn.Module,ansatz_factor: AnsatzFactor):
         super().__init__()
         self.model = model
         self.ansatz_factor = ansatz_factor

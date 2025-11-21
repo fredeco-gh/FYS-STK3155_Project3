@@ -6,19 +6,19 @@ import torch.nn as nn
 
 
 class Schrodinger1DTimeIndependentPINN(PhysicsInformedNN):
-    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor, L: float = 1.0, E: float = 0.5):
-        super().__init__(model, ansatz_factor)
+    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor,L: float = 1.0, E: float = 0.5):
+        super().__init__(model,ansatz_factor)
         self.L = L
-        self.E = E
+        self.E = nn.Parameter(torch.tensor(E,dtype=torch.float32))
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
 
         raw = self.model(inputs)
+        psi = raw*self.ansatz_factor(inputs,self)
 
              #raw = torch.complex(raw[0], raw[1])
 
-        psi = raw*self.ansatz_factor(inputs,self)
         return psi
     
 
@@ -56,13 +56,16 @@ class LossTISE1D(PhysicsLoss):
 
         E = pinn.E # Energy eigenvalue
 
+        
 
-        residual = -0.5*d2psi_dx2 - E * psi
-        if self.potential is not None:
-            residual += self.potential(inputs) * psi
-        loss = torch.mean(residual**2)
+        #residual = (-0.5*d2psi_dx2 - E * psi)
+        #if self.potential is not None:
+        #    residual += self.potential(inputs) * psi
+        #loss = torch.mean(residual**2)
 
-        return self.weight * loss
+        #norm = torch.trapz(psi[:,0]**2,x[:,0])
+
+        #return self.weight * loss + self.weight_norm*(norm - 1)**2,d2psi_dx2
     
 class PotentialHarmonicOscillator(Potential):
     def __call__(self, inputs: torch.Tensor) -> torch.Tensor:

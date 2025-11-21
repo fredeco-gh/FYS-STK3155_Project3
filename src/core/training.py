@@ -16,12 +16,13 @@ def train_tise_example(
     lambd: float = 0.0,
     lr: float = 1e-3,
     batch_size: int = 16,
+    track_loss: bool = True,
     ansatz_factor: "AnsatzFactor" = ansatzfactor_1Dbox,
     potential: "Potential" | None = None,
     step_method: str = "Adam", 
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
 ):
-    x = torch.linspace(-L,L,256)
+    x = torch.linspace(-L,L,N_samples)
     input_loader = DataLoader(x, batch_size=batch_size, shuffle=True)
     device = torch.device(device)
 
@@ -33,7 +34,7 @@ def train_tise_example(
         width=width,
         activation_func=nn.Tanh,
     ).to(device)
-    pinn = Schrodinger1DTimeIndependentPINN(model, ansatz_factor = ansatz_factor, L=L, E = E).to(device)
+    pinn = Schrodinger1DTimeIndependentPINN(model, ansatz_factor,L=L, E = E).to(device)
 
     # Define loss
     total_loss_fn = LossTISE1D(potential)
@@ -45,20 +46,34 @@ def train_tise_example(
     elif step_method == "RMSProp": 
         optimizer = torch.optim.RMSprop(pinn.parameters(), lr=lr,weight_decay=lambd)
 
+    second_der = []
+
+    if track_loss == True: 
+        loss_vals = []
     # Train the model
     for epoch in range(1, n_epochs + 1):
+
+        #x_batch = torch.rand(N_samples, 1, device=device) * 2*L - L
+        #input_loader = DataLoader(x_batch, batch_size=batch_size, shuffle=True)
+
         epoch_loss = 0
         for batch in input_loader: 
             optimizer.zero_grad()
-            loss = total_loss_fn(pinn, batch.view(-1, 1))
+            loss,d2psidx2 = total_loss_fn(pinn, batch.view(-1, 1))
+            second_der.append(d2psidx2.detach())
             loss.backward()
             optimizer.step()
 
             epoch_loss += loss
+        if track_loss == True: 
+                loss_vals.append(epoch_loss.detach().numpy())
         
         if epoch % 100 == 0:
             print(f"Epoch {epoch}/{n_epochs}. Loss={epoch_loss}...", end="\r")
-        
+    
 
     # After training, return model and energy
-    return pinn
+
+    if track_loss == True: 
+        return pinn, loss_vals,second_der
+    return pinn,second_der
