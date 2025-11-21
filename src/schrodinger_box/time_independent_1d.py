@@ -70,7 +70,7 @@ class LossTISE1D(PhysicsLoss):
 
         norm = torch.trapz(psi[:,0]**2,x[:,0])
 
-        return self.weight * loss + self.weight_norm*(norm - 1)**2,d2psi_dx2
+        return self.weight * loss + self.weight_norm*(norm - 1)**2 + self.weight_BD*(psi[0,0]**2 + psi[-1,0]**2),d2psi_dx2
     
 class PotentialHarmonicOscillator(Potential):
     def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
@@ -96,6 +96,11 @@ def ansatzfactor_1Dbox(inputs: torch.Tensor,pinn: "Schrodinger1DTimeIndependentP
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
     x = inputs.clone().detach().requires_grad_(True)
     return (x+pinn.L)*(x-pinn.L)
+
+def ansatzfactor_nothing(inputs: torch.Tensor,pinn: "Schrodinger1DTimeIndependentPINN"):
+    assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
+    x = inputs.clone().detach().requires_grad_(True)
+    return torch.ones_like(x)
 
 # class LossBoundary(PhysicsLoss): #! Feil
 #     def __call__(self, pinn: Schrodinger1DTimeIndependentPINN, inputs: torch.Tensor) -> torch.Tensor:

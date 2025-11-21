@@ -20,6 +20,7 @@ class PhysicsLoss(Generic[PINN], ABC):
         super().__init__()
         self.weight: float = 1.0
         self.weight_norm = 0
+        self.weight_BD = 1.0
     
     @abstractmethod
     def __call__(self, pinn: PINN, inputs: torch.Tensor) -> torch.Tensor:
