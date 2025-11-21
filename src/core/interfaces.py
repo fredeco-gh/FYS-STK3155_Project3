@@ -19,8 +19,6 @@ class PhysicsLoss(Generic[PINN], ABC):
     def __init__(self) -> None:
         super().__init__()
         self.weight: float = 1.0
-        self.weight_norm = 0
-        self.weight_BD = 1.0
     
     @abstractmethod
     def __call__(self, pinn: PINN, inputs: torch.Tensor) -> torch.Tensor:
@@ -54,15 +52,21 @@ class CompositePhysicsLoss(PhysicsLoss):
     
     def __add__(self, other: PhysicsLoss) -> CompositePhysicsLoss:
         return CompositePhysicsLoss(*self.losses, other)
+        
+    def compute_individual_losses(self, pinn: "PhysicsInformedNN", inputs: torch.Tensor) -> list[torch.Tensor]:
+        return [loss(pinn, inputs) for loss in self.losses]
 
 AnsatzFactor = Callable[[torch.Tensor, PINN], torch.Tensor]
 
 class PhysicsInformedNN(ABC, torch.nn.Module):
     """Base class for physics-informed neural networks."""
-    def __init__(self, model: torch.nn.Module,ansatz_factor: AnsatzFactor):
+    def __init__(self, model: torch.nn.Module, ansatz_factor: AnsatzFactor | None):
         super().__init__()
         self.model = model
-        self.ansatz_factor = ansatz_factor
+        if ansatz_factor is None:
+            self.ansatz_factor = lambda _,__: 1
+        else:
+            self.ansatz_factor = ansatz_factor
 
     @abstractmethod
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
