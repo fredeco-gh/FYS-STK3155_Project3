@@ -56,16 +56,21 @@ class LossTISE1D(PhysicsLoss):
 
         E = pinn.E # Energy eigenvalue
 
-        
+        H_psi = -0.5*d2psi_dx2
+
+        if self.potential is not None:
+            H_psi += self.potential(inputs) * psi
+
+        loss = ((torch.trapz(psi[:,0]*H_psi[:,0],x[:,0]))/(torch.trapz(psi[:,0]**2)) - E)**2
 
         #residual = (-0.5*d2psi_dx2 - E * psi)
         #if self.potential is not None:
         #    residual += self.potential(inputs) * psi
         #loss = torch.mean(residual**2)
 
-        #norm = torch.trapz(psi[:,0]**2,x[:,0])
+        norm = torch.trapz(psi[:,0]**2,x[:,0])
 
-        #return self.weight * loss + self.weight_norm*(norm - 1)**2,d2psi_dx2
+        return self.weight * loss + self.weight_norm*(norm - 1)**2,d2psi_dx2
     
 class PotentialHarmonicOscillator(Potential):
     def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
