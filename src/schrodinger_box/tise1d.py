@@ -4,11 +4,11 @@ import torch
 import torch.nn as nn
 
 class PINN(PhysicsInformedNN):
-    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor | None, L: float = 1.0, E: float = 0.5):
+    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor | None, x_lim: tuple[float, float], E_init: float = 0.5):
         super().__init__(model,ansatz_factor)
-        self.L = L
+        self.x_lim = x_lim
         #self.E = torch.tensor(E)   #
-        self.E = nn.Parameter(torch.tensor(E,dtype=torch.float32))
+        self.E = nn.Parameter(torch.tensor(E_init, dtype=torch.float32))
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
@@ -68,7 +68,8 @@ class Loss_Norm(PhysicsLoss):
         psi = pinn(inputs)  # (N,1)
         prob = psi**2
 
-        L = pinn.L
+        x_start, x_end = pinn.x_lim
+        L = x_end - x_start
 
         norm_est = prob.mean() * L  # Monte Carlo integral
         
@@ -101,13 +102,30 @@ class Loss_Orthogonality(PhysicsLoss):
 
         return self.weight * total.sum()
 
+class PotentialHarmonicOscillator(Potential):
+    def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
+        assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
+        x = inputs.clone().detach().requires_grad_(True)
 
-def ansatzfactor(inputs: torch.Tensor,pinn: "PINN"):
+
+        V = 0.5*x**2
+
+        return V
+
+def ansatzfactor_box(inputs: torch.Tensor, pinn: "PINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
     x = inputs
-    return x * (pinn.L - x)
 
-def ansatzfactor_n2(inputs: torch.Tensor,pinn: "PINN"):
+    x_start, x_end = pinn.x_lim
+    
+    return (x - x_start) * (x - x_end)
+
+def ansatzfactor_HO_sym(inputs: torch.Tensor, pinn: "PINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
     x = inputs
-    return x * (pinn.L - x) * (pinn.L/2 - x)
+    return torch.exp(-x**2/2)
+
+def ansatzfactor_HO_asym(inputs: torch.Tensor, pinn: "PINN"):
+    assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
+    x = inputs
+    return torch.exp(-x**2/2)*x
