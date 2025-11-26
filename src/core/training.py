@@ -5,7 +5,6 @@ from torch import nn
 from core.interfaces import AnsatzFactor,Potential
 from core.neural_network import FeedForwardNN
 from schrodinger_box.time_independent_1d import LossBoundary, NormLoss, Schrodinger1DTimeIndependentPINN, LossTISE1D, ansatzfactor_1Dbox
-from schrodinger_box.time_dependent_1d import Schrodinger1DTimeDependentPINN,LossTDSE1D
 from torch.utils.data import DataLoader
 
 def train_tise_example(
@@ -63,88 +62,6 @@ def train_tise_example(
         for batch in input_loader: 
             optimizer.zero_grad()
             loss = total_loss_fn(pinn, batch.view(-1, 1))
-            loss.backward()
-            optimizer.step()
-
-            epoch_loss += loss
-        if track_loss == True: 
-            loss_vals.append(epoch_loss.detach().numpy())
-        
-        if epoch % 100 == 0:
-            print(f"Epoch {epoch}/{n_epochs}. Loss={float(epoch_loss.detach()):.3e}...", end="\r")
-            # print(f"Individual losses: {total_loss_fn.compute_individual_losses(pinn, x.view(-1,1))}")
-    
-
-    # After training, return model and energy
-
-    if track_loss: 
-        return pinn, loss_vals
-    return pinn, None
-
-def train_tdse_example(
-    L: float = 1.0,
-    T: float = 1.0,
-    n_epochs: int = 5000,
-    N_x_samples: int = 256,
-    N_t_samples: int = 50,
-    hidden_layers: int = 3,
-    width: int = 64,
-    lambd: float = 0.0,
-    lr: float = 1e-3,
-    batch_size: int = 16,
-    track_loss: bool = True,
-    ansatz_factor: "AnsatzFactor | None" = ansatzfactor_1Dbox,
-    initial_condition: Callable = None,
-    potential: "Potential | None" = None,
-    step_method: str = "Adam", 
-    device: str = "cuda" if torch.cuda.is_available() else "cpu",
-):
-    input = torch.zeros(N_x_samples*N_t_samples,2)
-
-    x,t = torch.meshgrid(torch.linspace(-L,L,N_x_samples),torch.linspace(0,T,N_t_samples),indexing="ij")
-
-    input[:,0] = torch.flatten(x.T)
-    input[:,1] = torch.flatten(t.T)
-
-    input_loader = DataLoader(input, batch_size=batch_size, shuffle=True)
-    device = torch.device(device)
-
-    #Build the model
-    model = FeedForwardNN(
-        in_dim=2,
-        out_dim=2,
-        hidden_layers=hidden_layers,
-        width=width,
-        activation_func=nn.Tanh,
-    ).to(device)
-    pinn = Schrodinger1DTimeDependentPINN(model, ansatz_factor,initial_condition = initial_condition,L=L,T=T).to(device)
-
-    # Define loss
-    total_loss_fn = LossTDSE1D(potential)
-
-    # Define optimizer
-    
-    if step_method == "Adam": 
-        optimizer = torch.optim.Adam(pinn.parameters(), lr=lr,weight_decay=lambd)
-    elif step_method == "RMSProp": 
-        optimizer = torch.optim.RMSprop(pinn.parameters(), lr=lr,weight_decay=lambd)
-    else:
-        raise ValueError("step_method must be either 'Adam' or 'RMSProp'")
-
-    loss_vals = []
-
-    # Train the model
-    for epoch in range(1, n_epochs + 1):
-        if epoch % 100 == 0: 
-            print(f"Epoch: {epoch}/{n_epochs}", end = "\r")
-
-        #x_batch = torch.rand(N_samples, 1, device=device) * 2*L - L
-        #input_loader = DataLoader(x_batch, batch_size=batch_size, shuffle=True)
-
-        epoch_loss = torch.Tensor([0.0]).to(device)
-        for batch in input_loader: 
-            optimizer.zero_grad()
-            loss = total_loss_fn(pinn, batch,N_t_samples)
             loss.backward()
             optimizer.step()
 
