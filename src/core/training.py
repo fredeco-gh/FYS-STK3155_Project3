@@ -5,9 +5,10 @@ from torch import nn
 from core.interfaces import AnsatzFactor,Potential, PhysicsLoss
 from core.neural_network import FeedForwardNN
 from torch.utils.data import DataLoader
-from schrodinger_box import tise1d
+from tise1d import tise1d
 
 def train_tise(
+    x,
     loss_func: PhysicsLoss,
     ansatz_factor: "AnsatzFactor | None",
     x_lim: tuple[float,float] = (0.0,1.0),
@@ -24,7 +25,6 @@ def train_tise(
     verbose: bool = True,
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
 ):
-    x = torch.linspace(x_lim[0], x_lim[1],N_samples).view(-1, 1).to(device)
     input_loader = DataLoader(x, batch_size=batch_size, shuffle=True)
 
     #Build the model
