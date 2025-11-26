@@ -2,3 +2,4 @@
 .conda/
 local/
 __pycache__/
+wandb/
