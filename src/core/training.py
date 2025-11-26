@@ -18,7 +18,7 @@ def train_tise(
     width: int = 32,
     lambd: float = 0.0,
     lr: float = 1e-2,
-    N_samples: int = 256,
+    lr_energy: float | None = None,
     batch_size: int = 256,
     step_method: Callable[..., torch.optim.Optimizer] = torch.optim.Adam, 
     activation_func: type[nn.Module] = nn.Tanh,
@@ -39,7 +39,13 @@ def train_tise(
 
     # Define optimizer
     
-    optimizer = step_method(pinn.parameters(), lr=lr,weight_decay=lambd)
+    if lr_energy is None:
+        lr_energy = lr
+    optimizer = step_method([
+        {"params": pinn.model.parameters(), "lr": lr, "weight_decay": lambd},
+        {"params": [pinn.E], "lr": lr_energy},
+        
+    ])
 
     # Train the model
     for epoch in range(1, n_epochs + 1):
