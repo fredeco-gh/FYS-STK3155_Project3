@@ -6,10 +6,10 @@ import torch.nn as nn
 
 
 class Schrodinger1DTimeIndependentPINN(PhysicsInformedNN):
-    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor | None, L: float = 1.0, E: float = 0.5):
+    def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor | None, L: float = 1.0,E: float = 0.5):
         super().__init__(model,ansatz_factor)
         self.L = L
-        self.E = nn.Parameter(torch.tensor(E,dtype=torch.float32))
+        self.E = E             # nn.Parameter(torch.tensor(E,dtype=torch.float32))
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
@@ -102,22 +102,22 @@ class PotentialHarmonicOscillator(Potential):
     
 def ansatzfactor_HO_sym(inputs: torch.Tensor, pinn: "Schrodinger1DTimeIndependentPINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-    x = inputs.clone().detach().requires_grad_(True)
+    x = inputs
     return torch.exp(-x**2/2)
 
 def ansatzfactor_HO_asym(inputs: torch.Tensor, pinn: "Schrodinger1DTimeIndependentPINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-    x = inputs.clone().detach().requires_grad_(True)
+    x = inputs
     return torch.exp(-x**2/2)*x
 
 def ansatzfactor_1Dbox(inputs: torch.Tensor,pinn: "Schrodinger1DTimeIndependentPINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-    x = inputs.clone().detach().requires_grad_(True)
+    x = inputs
     return (x+pinn.L)*(x-pinn.L)
 
 def ansatzfactor_nothing(inputs: torch.Tensor,pinn: "Schrodinger1DTimeIndependentPINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-    x = inputs.clone().detach().requires_grad_(True)
+    x = inputs
     return torch.ones_like(x)
 
 # class LossBoundary(PhysicsLoss): #! Feil

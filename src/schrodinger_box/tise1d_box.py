@@ -7,6 +7,7 @@ class PINN(PhysicsInformedNN):
     def __init__(self, model: nn.Module, ansatz_factor: AnsatzFactor | None, L: float = 1.0, E: float = 0.5):
         super().__init__(model,ansatz_factor)
         self.L = L
+        #self.E = torch.tensor(E)   #
         self.E = nn.Parameter(torch.tensor(E,dtype=torch.float32))
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
@@ -53,9 +54,10 @@ class Loss_PDE(PhysicsLoss):
             H_psi = H_psi + Vx * psi
 
         # PDE residual
-        residual = H_psi - E * psi
+        residual = H_psi - E*psi   
 
-        loss = torch.mean(residual**2)
+        loss =  torch.mean(residual**2)/torch.mean(psi**2)          #(torch.mean(psi*residual)/torch.mean(psi**2) - E)**2    
+
         return self.weight * loss
 
 
@@ -93,7 +95,8 @@ class Loss_Orthogonality(PhysicsLoss):
                 psi_m = ref(x)[:, 0]  # (N,)
 
             # inner product ≈ L * mean(psi_n * psi_m)
-            overlap_est = pinn.L * torch.mean(psi_n * psi_m)
+
+            overlap_est = torch.mean(psi_n * psi_m)/torch.sqrt((torch.mean(psi_n**2)*torch.mean(psi_m**2)))
             total = total + overlap_est**2
 
         return self.weight * total.sum()
