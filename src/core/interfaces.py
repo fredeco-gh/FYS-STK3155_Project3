@@ -1,8 +1,7 @@
 # src/core/interfaces.py
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, asdict, fields
-from typing import Callable, TypeVar, Generic, Any
+from typing import Callable, TypeVar, Generic
 import torch
 import copy
 

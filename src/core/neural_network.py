@@ -1,10 +1,6 @@
 # src/core/neural_network.py
 from __future__ import annotations
-from typing import Generic
 from torch import nn
-from abc import ABC, abstractmethod
-import torch
-
 
 class FeedForwardNN(nn.Module):
     """Simple feed-forward neural network."""
