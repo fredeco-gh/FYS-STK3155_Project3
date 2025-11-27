@@ -47,19 +47,31 @@ def train_tise(
         
     ])
 
+    # Keep track of the best model with best validation loss
+    best_loss = float("inf")
+    best_state = None
+
+    
     # Train the model
     for epoch in range(1, n_epochs + 1):
-        epoch_loss = torch.Tensor([0.0]).to(device)
+        epoch_loss = 0.0
         for batch in input_loader: 
             optimizer.zero_grad()
             loss = loss_func(pinn, batch.view(-1, 1))
             loss.backward()
             optimizer.step()
-            epoch_loss += loss
+            epoch_loss += loss.item()
+
+        if epoch_loss < best_loss:
+            best_loss = epoch_loss
+            best_state = {k: v.detach().cpu().clone() for k, v in pinn.state_dict().items()} # Copy best state to CPU
         
         if verbose and epoch % 100 == 0:
-            print(f"Epoch {epoch}/{n_epochs}. Loss={float(epoch_loss.detach()):.3e}...", end="\r")
-            # print(f"Individual losses: {total_loss_fn.compute_individual_losses(pinn, x.view(-1,1))}")
+            print(f"Epoch {epoch}/{n_epochs}. Best loss={best_loss:.3e}. Current loss={epoch_loss:.3e}. E={pinn.E.item():.6f}")
 
-    # After training, return model
+    # After training, return the best model
+    if best_state is not None:
+        pinn.load_state_dict(best_state)
+        pinn.to(device)
+
     return pinn
