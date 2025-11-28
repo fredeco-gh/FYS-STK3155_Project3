@@ -7,18 +7,20 @@ from tise1d.tise1d import Loss_PDE, Loss_Orthogonality, PotentialHarmonicOscilla
 from core.training import train_tise
 from param_search.A_train_ground_state import load_ground_state_pinn
 import wandb
+from utils import generate_input_data
+from tise1d.analytic_ho import energy_analytic
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # System parameters
 x_lim = (-5.0, 5.0)
 N_samples = 256
-E_excited_exact = 1.5  # Exact energy for first excited state of harmonic oscillator
+E_excited_exact = energy_analytic(n=1)  # Exact energy for first excited state of harmonic oscillator
 
 # Generate data points
 torch.manual_seed(124)
-x = torch.rand(N_samples, 1, device=device) * (x_lim[1] - x_lim[0]) + x_lim[0]
-x_test = torch.rand(N_samples, 1, device=device) * (x_lim[1] - x_lim[0]) + x_lim[0]
+x = generate_input_data(N_samples, x_lim, device)
+x_test = generate_input_data(N_samples, x_lim, device)
 
 
 pinn1 = load_ground_state_pinn(device)
