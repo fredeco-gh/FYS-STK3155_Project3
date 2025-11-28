@@ -19,12 +19,15 @@ def train_tise(
     lambd: float = 0.0,
     lr: float = 1e-2,
     lr_energy: float | None = None,
-    batch_size: int = 256,
+    batch_size: int | None = None,
     step_method: Callable[..., torch.optim.Optimizer] = torch.optim.Adam, 
     activation_func: type[nn.Module] = nn.Tanh,
     verbose: bool = True,
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
 ):
+    
+    if batch_size == None: 
+        batch_size = x.shape[0]
     input_loader = DataLoader(x, batch_size=batch_size, shuffle=True)
 
     #Build the model
