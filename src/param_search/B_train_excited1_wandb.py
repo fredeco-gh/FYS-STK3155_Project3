@@ -75,4 +75,5 @@ def main():
         )
 
 if __name__ == "__main__":
+    # NOTE: This script is intended to be run as part of a "Weights and Biases" (wandb) sweep.
     main()
