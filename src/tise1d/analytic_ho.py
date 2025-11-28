@@ -2,6 +2,8 @@ import torch
 from scipy.special import factorial, hermite
 import numpy as np
 from numpy.typing import NDArray
+from tise1d import tise1d
+import matplotlib.pyplot as plt
 
 hbar = 1
 m = 1
@@ -13,3 +15,39 @@ def psi_analytic(x: NDArray[np.floating], n: int):
 
 def energy_analytic(n: int):
     return hbar*omega*(n + 0.5)
+
+def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.PINN, n: int):
+    # Sort for plotting
+    order = x.argsort(dim=0).squeeze()
+    x = x[order]
+    
+    with torch.no_grad():
+        psi_pred = pinn(x).detach().cpu().numpy()
+
+    x_np = x.detach().cpu().numpy() # Convert to numpy array for analytic function
+    psi_exact = psi_analytic(x_np, n=n)
+
+    # Flip sign if negative overlap
+    overlap = np.sum(psi_pred*psi_exact)
+    if overlap < 0: 
+        psi_pred = -psi_pred
+
+    energy_exact = energy_analytic(n)
+    energy_pred = pinn.E.detach().cpu().item()
+    energy_rel_error = abs(energy_pred-energy_exact)/energy_exact
+
+    
+    print(f"Predicted Energy: {energy_pred:.6f}, Exact Energy: {energy_exact:.6f}, Relative Error: {energy_rel_error:.6%}")
+    
+    
+    
+    L = x_lim[1] - x_lim[0]
+    psi_pred_normalized = psi_pred/np.sqrt(L*np.mean(psi_pred**2)) # Normalize using monte carlo integration
+    
+    plt.plot(x_np, psi_pred_normalized, label='PINN Prediction')
+    plt.plot(x_np, psi_exact, label='Analytic Solution', linestyle='dashed')
+    plt.xlabel('x')
+    plt.ylabel('ψ(x)')
+    plt.title('Comparison of PINN and Analytic Solution')
+    plt.legend()
+    plt.show()

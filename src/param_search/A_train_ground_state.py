@@ -1,23 +1,24 @@
 import sys
 import pathlib
+
 sys.path.append(str(pathlib.Path(__file__).parent.parent))  # to import from src folder
 
 import torch
 from tise1d.tise1d import Loss_PDE, PotentialHarmonicOscillator, ansatzfactor_HO_sym
 from core.training import train_tise
+from utils import generate_input_data
+from tise1d.analytic_ho import compare_analytic, energy_analytic
 
 
 x_lim = (-5.0, 5.0)
-path = pathlib.Path(__file__).parent / "pinn1_ground_state.pt"
+save_path = pathlib.Path(__file__).parent / "models/ground_state_params.pt"
 
-def main():
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
+def train_ground_state_pinn(device):
     N_samples = 256
 
     torch.manual_seed(124)
-    x = torch.rand(N_samples, 1, device=device) * (x_lim[1] - x_lim[0]) + x_lim[0]
+    x = generate_input_data(N_samples, x_lim, device=device)
+    
 
     pinn1 = train_tise(
         x,
@@ -31,14 +32,7 @@ def main():
         device=device,
         verbose=True,
     )
-
-    # Evaluate ground state PINN
-    eval_loss1 = Loss_PDE(PotentialHarmonicOscillator())(pinn1, x)
-    print(f"Ground state PINN evaluation loss: {eval_loss1:.3e}")
-
-
-    # Save to current folder
-    torch.save(pinn1.state_dict(), path)
+    return pinn1
 
 
 
@@ -57,7 +51,28 @@ def load_ground_state_pinn(device):
     ).to(device)
     pinn1 = TisePINN(model, ansatzfactor_HO_sym, x_lim=x_lim, E_init=0.1).to(device)
 
-    state_dict = torch.load(path, map_location=device)
+    state_dict = torch.load(save_path, map_location=device)
     pinn1.load_state_dict(state_dict)
     pinn1.eval()
     return pinn1
+
+
+if __name__ == "__main__":
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    pinn1 = train_ground_state_pinn(device)
+
+    # Save pinn1 parameters to file
+    torch.save(pinn1.state_dict(), save_path)
+
+    # Load pinn1 for evaluation
+    # pinn1 = load_ground_state_pinn('cpu')
+
+    # Evaluate
+    torch.manual_seed(124)
+    x_test = generate_input_data(1024, x_lim, device=device)
+    loss = Loss_PDE(PotentialHarmonicOscillator())(pinn1, x_test).detach().cpu().item()
+    
+    compare_analytic(x_test, x_lim, pinn1, n=0)
+
+
+    

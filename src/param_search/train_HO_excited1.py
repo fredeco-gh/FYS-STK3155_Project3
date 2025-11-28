@@ -1,5 +1,3 @@
-#!/itf-fi-ml/home/heineeh/skole/FYS-STK3155/project3/.venv/bin/python
-
 import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.parent))  # to import from src folder
@@ -7,7 +5,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent))  # to import from src
 import torch
 from tise1d.tise1d import Loss_PDE, Loss_Orthogonality, PotentialHarmonicOscillator, ansatzfactor_HO_sym
 from core.training import train_tise
-from param_search.train_ground_state import load_ground_state_pinn
+from param_search.A_train_ground_state import load_ground_state_pinn
 import wandb
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
