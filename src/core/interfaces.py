@@ -39,12 +39,12 @@ class Potential(Generic[PINN], ABC):
     def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
         pass
 
-class CompositePhysicsLoss(PhysicsLoss):
+class CompositePhysicsLoss(PhysicsLoss, Generic[PINN]):
     """Composite loss that aggregates multiple PhysicsLoss components."""
     def __init__(self, *losses: PhysicsLoss):
         self.losses = losses
 
-    def __call__(self, pinn: "PhysicsInformedNN", inputs: torch.Tensor) -> torch.Tensor:
+    def __call__(self, pinn: PINN, inputs: torch.Tensor) -> torch.Tensor:
         # Sum all losses
         losses = [loss(pinn, inputs) for loss in self.losses]
         return torch.stack(losses).sum()
@@ -52,7 +52,7 @@ class CompositePhysicsLoss(PhysicsLoss):
     def __add__(self, other: PhysicsLoss) -> CompositePhysicsLoss:
         return CompositePhysicsLoss(*self.losses, other)
         
-    def compute_individual_losses(self, pinn: "PhysicsInformedNN", inputs: torch.Tensor) -> list[torch.Tensor]:
+    def compute_individual_losses(self, pinn: PINN, inputs: torch.Tensor) -> list[torch.Tensor]:
         return [loss(pinn, inputs) for loss in self.losses]
 
 AnsatzFactor = Callable[[torch.Tensor, PINN], torch.Tensor]
