@@ -14,13 +14,13 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
 
-device ="cuda" if torch.cuda.is_available() else "cpu"
+# device ="cuda" if torch.cuda.is_available() else "cpu"
 x_lim = (-5.0, 5.0)
-pinn1 = load_ground_state_pinn(device)
+pinn1 = load_ground_state_pinn("cpu")
 
 
 torch.manual_seed(124)
-x_test = generate_input_data(2048, x_lim, device)
+x_test = generate_input_data(2048, x_lim, "cpu")
 
 
 def train_func(x: torch.Tensor, ortho_loss_weight: float, **kwargs):
@@ -30,7 +30,7 @@ def train_func(x: torch.Tensor, ortho_loss_weight: float, **kwargs):
         loss_func=Loss_PDE(PotentialHarmonicOscillator())+ortho_loss_weight*Loss_Orthogonality([pinn1]),
     )
 def generate_data_func():
-    return generate_input_data(256, x_lim, device).detach().cpu().numpy()
+    return generate_input_data(256, x_lim, "cpu").numpy()
 
 
 def main():
@@ -42,9 +42,9 @@ def main():
         constant_parameters={
             "x_lim": x_lim,
             "ansatz_factor": ansatzfactor_HO_sym,
-            "n_epochs": 100,
+            "n_epochs": 3000,
             "E_init": 0.5,
-            "device": device,
+            # "device": device,
             "verbose": False,
 
             # Guess values
@@ -57,9 +57,10 @@ def main():
             "lr": lr_values,
         },
         generate_data_func=generate_data_func,
-        n_repeats=1,
+        n_repeats=10,
         seed=124,
-        max_workers=4
+        max_workers=16,
+        devices=["cuda:0","cuda:1","cuda:2","cuda:3"]
     )
 
     path = pathlib.Path(__file__).parent / "results" / "lr_grid_search.npy"
@@ -67,4 +68,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import multiprocessing as mp
+    mp.set_start_method("spawn", force=True)
     main()
