@@ -65,11 +65,11 @@ def main():
         loss_pde = Loss_PDE(PotentialHarmonicOscillator())(pinn, x_test).detach().cpu().item()
         loss_energy = torch.abs((pinn.E.detach() - E_excited_exact) / E_excited_exact).detach().cpu().item()
 
-        val_loss = loss_pde + 100 * loss_orthogonality
+        sum_loss = loss_pde + loss_orthogonality
 
         run.log(
             {
-                "validation_loss": val_loss,
+                "sum_loss": sum_loss,
                 "Loss_PDE": loss_pde,
                 "Loss_Orthogonality": loss_orthogonality,
                 "Loss_Energy": loss_energy,
