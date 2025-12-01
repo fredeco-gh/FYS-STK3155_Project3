@@ -46,9 +46,9 @@ def run_single_config(
                 input_data_np = generate_data_func()
                 input_data = torch.from_numpy(input_data_np).to(device)
                 # Input data has to be the first parameter of train_func
-                model = train_func(input_data, **parameters)
+                model = train_func(input_data, **parameters, device=device)
             else:
-                model = train_func(**parameters)
+                model = train_func(**parameters, device=device)
             
             for i, metric_func in enumerate(metrics):
                 metric_value = metric_func(model, test_points)

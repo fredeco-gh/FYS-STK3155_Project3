@@ -83,14 +83,20 @@ class Loss_Orthogonality(PhysicsLoss):
         self.reference_states = reference_states
     
     def __call__(self, pinn: "PINN", inputs: torch.Tensor) -> torch.Tensor:
+        # Use the device of the current network
+        device = next(pinn.parameters()).device
+
         assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-        x = inputs
+        x = inputs.to(device)
+
+
 
         # current eigenfunction (n-th)
         psi_n = pinn(x)[:, 0]  # (N,)
 
         total = torch.Tensor([0.0]).to(x.device)
         for ref in self.reference_states:
+            ref = ref.to(device)
             # detach ref to avoid backprop through it
             with torch.no_grad():
                 psi_m = ref(x)[:, 0]  # (N,)
