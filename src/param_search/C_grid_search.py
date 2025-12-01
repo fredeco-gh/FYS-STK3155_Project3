@@ -34,7 +34,7 @@ def generate_data_func():
 
 
 def main():
-    lr_values = np.logspace(np.log10(4e-5),np.log10(1e-2), 30)
+    lr_energy_values = np.logspace(-3, 0, 30)
     result = grid_search_parallel(
         train_func,
         metrics=[Loss_PDE(PotentialHarmonicOscillator()), Loss_Orthogonality([pinn1])],
@@ -51,10 +51,10 @@ def main():
             "hidden_layers": 3,
             "width": 64,
             "ortho_loss_weight": 100,
-            "lr_energy": 2e-2,
+            "lr": 5e-2,
         },
         sweep_parameters={
-            "lr": lr_values,
+            "lr_energy": lr_energy_values,
         },
         generate_data_func=generate_data_func,
         n_repeats=10,
@@ -63,7 +63,7 @@ def main():
         devices=["cuda:0","cuda:1","cuda:2","cuda:3"]
     )
 
-    path = pathlib.Path(__file__).parent / "results" / "lr_grid_search.npy"
+    path = pathlib.Path(__file__).parent / "results" / "lr_energy_grid_search.npy"
     np.save(path, result)
 
 
