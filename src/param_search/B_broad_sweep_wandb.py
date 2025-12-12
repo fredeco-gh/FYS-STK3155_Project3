@@ -7,7 +7,7 @@ from tise1d.tise1d import Loss_PDE, Loss_Orthogonality, PotentialHarmonicOscilla
 from core.training import train_tise
 from param_search.A_train_ground_state import load_ground_state_pinn
 import wandb
-from utils import generate_input_data
+from utils.utils import generate_input_data
 from tise1d.analytic_ho import energy_analytic
 
 device = "cuda" if torch.cuda.is_available() else "cpu"

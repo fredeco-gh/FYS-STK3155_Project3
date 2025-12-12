@@ -9,7 +9,7 @@ from core.grid_search import grid_search_parallel
 from core.training import train_tise
 from tise1d.tise1d import Loss_PDE, PotentialHarmonicOscillator, Loss_Orthogonality, ansatzfactor_HO_sym
 from param_search.A_train_ground_state import load_ground_state_pinn
-from utils import generate_input_data
+from utils.utils import generate_input_data
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
@@ -34,7 +34,7 @@ def generate_data_func():
 
 
 def main():
-    lr_energy_values = np.logspace(-3, 0, 30)
+    lr_energy_values = np.logspace(np.log10(5e-4), 0, 30)
     result = grid_search_parallel(
         train_func,
         metrics=[Loss_PDE(PotentialHarmonicOscillator()), Loss_Orthogonality([pinn1])],
@@ -50,8 +50,8 @@ def main():
             # Guess values
             "hidden_layers": 3,
             "width": 64,
-            "ortho_loss_weight": 100,
-            "lr": 5e-2,
+            "ortho_loss_weight": 1,
+            "lr": 1e-4,
         },
         sweep_parameters={
             "lr_energy": lr_energy_values,
@@ -59,8 +59,8 @@ def main():
         generate_data_func=generate_data_func,
         n_repeats=10,
         seed=124,
-        max_workers=16,
-        devices=["cuda:0","cuda:1","cuda:2","cuda:3"]
+        max_workers=8,
+        devices=["cpu"]
     )
 
     path = pathlib.Path(__file__).parent / "results" / "lr_energy_grid_search.npy"
