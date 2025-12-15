@@ -44,10 +44,8 @@ def main():
             "ansatz_factor": ansatzfactor_HO_sym,
             "n_epochs": 3000,
             "E_init": 0.5,
-            # "device": device,
             "verbose": False,
 
-            # Guess values
             "hidden_layers": 3,
             "width": 64,
             "ortho_loss_weight": 1,
