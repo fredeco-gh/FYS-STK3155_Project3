@@ -7,7 +7,7 @@ import torch
 from tise1d.tise1d import Loss_PDE, PotentialHarmonicOscillator, ansatzfactor_HO_sym
 from core.training import train_tise
 from utils.utils import generate_input_data
-from tise1d.analytic_ho import compare_analytic, energy_analytic
+from tise1d.analytic_ho import compare_analytic
 
 
 x_lim = (-5.0, 5.0)
