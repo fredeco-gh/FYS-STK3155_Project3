@@ -19,7 +19,7 @@ def energy_analytic(n: int):
     return hbar*omega*(n + 0.5)
 
 # Plot and compare predicted (by the neural network) and exact QHO wavefunction 
-def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.PINN, n: int, show=True):
+def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.PINN, n: int, show=True, title=True):
     # Sort for plotting
     order = x.argsort(dim=0).squeeze()
     x = x[order]
@@ -48,7 +48,8 @@ def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.P
     plt.plot(x_np, psi_exact, label='Analytic Solution', linestyle='dashed')
     plt.xlabel('x')
     plt.ylabel('ψ(x)')
-    plt.title('Comparison of PINN and Analytic Solution')
     plt.legend()
+    if title:
+        plt.title('Comparison of PINN and Analytic Solution')
     if show:
         plt.show()
