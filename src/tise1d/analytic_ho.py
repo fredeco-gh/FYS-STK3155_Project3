@@ -16,7 +16,7 @@ def psi_analytic(x: NDArray[np.floating], n: int):
 def energy_analytic(n: int):
     return hbar*omega*(n + 0.5)
 
-def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.PINN, n: int):
+def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.PINN, n: int, show=True):
     # Sort for plotting
     order = x.argsort(dim=0).squeeze()
     x = x[order]
@@ -50,4 +50,5 @@ def compare_analytic(x: torch.Tensor, x_lim: tuple[float, float], pinn: tise1d.P
     plt.ylabel('ψ(x)')
     plt.title('Comparison of PINN and Analytic Solution')
     plt.legend()
-    plt.show()
+    if show:
+        plt.show()

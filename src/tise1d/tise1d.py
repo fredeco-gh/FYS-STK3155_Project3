@@ -61,22 +61,6 @@ class Loss_PDE(PhysicsLoss):
         return self.weight * loss
 
 
-class Loss_Norm(PhysicsLoss):
-    def __call__(self, pinn: "PINN", inputs: torch.Tensor) -> torch.Tensor:
-        assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-
-        psi = pinn(inputs)  # (N,1)
-        prob = psi**2
-
-        x_start, x_end = pinn.x_lim
-        L = x_end - x_start
-
-        norm_est = prob.mean() * L  # Monte Carlo integral
-        
-        # Norm should be 1.
-        loss = (norm_est - 1.0)**2
-        return self.weight * loss
-
 class Loss_Orthogonality(PhysicsLoss):
     def __init__(self, reference_states: list["PINN"]) -> None:
         super().__init__()
@@ -130,8 +114,3 @@ def ansatzfactor_HO_sym(inputs: torch.Tensor, pinn: "PINN"):
     assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
     x = inputs
     return torch.exp(-x**2/2)
-
-def ansatzfactor_HO_asym(inputs: torch.Tensor, pinn: "PINN"):
-    assert inputs.shape[1] == 1, "Expected input shape (N,1): x."
-    x = inputs
-    return torch.exp(-x**2/2)*x
