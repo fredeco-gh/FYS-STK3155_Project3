@@ -14,6 +14,7 @@ x_lim = (-5.0, 5.0)
 save_path = pathlib.Path(__file__).parent / "models/ground_state_params.pt"
 
 def train_ground_state_pinn(device):
+    """ Train PINN finding the ground state of the quantum harmonic oscillator"""
     N_samples = 256
 
     torch.manual_seed(124)
@@ -36,7 +37,7 @@ def train_ground_state_pinn(device):
 
 
 
-# Function for loading later
+# Function for loading PINN of ground state for later
 def load_ground_state_pinn(device):
     from tise1d.tise1d import PINN as TisePINN
     from core.neural_network import FeedForwardNN

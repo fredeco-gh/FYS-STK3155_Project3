@@ -39,7 +39,7 @@ def run_single_config(
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(seed)
 
-
+        # Run n_repeats times and average at the end
         for _ in range(n_repeats):
             if generate_data_func is not None:
                 # Generate new data for each repeat
@@ -136,6 +136,7 @@ def grid_search_parallel(
     n_combinations = np.prod([len(v) for v in sweep_parameters.values()])
     completed = 0
 
+    
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
         for i, (idx, values) in enumerate(enumerated_product(*sweep_parameters.values())):
