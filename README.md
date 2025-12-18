@@ -13,10 +13,19 @@ Our results are compared with a simple finite difference procedure to find the s
 
 ## Folder structure
 
+`data/` - Folder containing files with data from grid search analysis
+
+`figs/` - Folder containing figures from the analysis, including the ones found in the report. 
+
 `code/` - Folder with all the code files, including:
+
+- `HO.ipynb` - notebook that finds ground state with neural networks, as well as the first guess for the excited state. 
+- `numHO.ipynb` - notebook that finds the finite difference numerical approximation to the solution, and compares the performance to neural networks. 
+- `param_search.ipynb` - notebook that performs the grid search analysis to find best hyperparameters for the first excited state. Includes also the analysis of the second and third excited states. 
 
 - `core/` - Folder containing code for training neural networks, as well as the grid search. It contains: 
 
+- `grid_search.py` - file containing code to perform the finer grid search. 
 - `interfaces.py` - file implementing the skeleton for a physics informed neural network and its cost function. 
 - `neural_network.py` - file implementing a feed forward neural network with PyTorch
 - `training.py` - file defining a function to train the neural network. 
@@ -29,17 +38,19 @@ Our results are compared with a simple finite difference procedure to find the s
 - `tise1d/` - Folder containing code for the quantum harmonic oscillator problem. It contains: 
 
 - `analytic_ho.py` - file with functions for the analytical solution to the harmonic oscillator problem, as well as code to compare NN results with the analytical one. 
-
 - `numerical_ho.py` - file with code for finding the numerical finite difference solution to the Schrödinger equation
 - `tise1d.py` - code implementing a physics informed neural network for the time independent Schrödinger equation, including the desired cost function. 
 
-- `utils/` - Folder with simple utilities. 
+- `utils/` - Folder with simple utilities. It contains: 
+
+-`cell_magic.py` - file that defines skip_if function
+-`plotting.py` - file with code to plot the results of the grid search analysis. 
+- `utils.py` - contains a function to generate data points
 
 Notes
 
-- The notebooks in `code/` reproduce the experiments and figures in the report.
+- The notebooks in `code/` reproduce the experiments in the report.
 - Most notebooks take a while to run, especially those involving hyperparameter searches. To load our computed results directly, set the top variable `LOAD_FROM_FILE = True` in each of the notebooks.
-- The core implementation is under `code/utils/` and is importable from the notebooks.
 
 ## Running the code
 
