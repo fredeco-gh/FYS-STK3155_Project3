@@ -6,46 +6,48 @@ Frederik Callin Østern, Heine Elias Husdal
 
 ## Project description
 
-In this project, we investigate the use of neural networks to solve differential equations in physics. In particular, we demonstrate a method for finding the energy eigenstates and eigenvalues of quantum systems, by applying it to find the excited states of the quantum harmonic oscillator problem in 1 dimension. The procedure is inspired by Physics Informed Neural Networks (PINN's), though with a modified residual cost function and an extra cost function ensuring orthogonality between different states. 
+In this project, we investigate the use of neural networks to solve differential equations in physics. In particular, we demonstrate a method for finding the energy eigenstates and eigenvalues of quantum systems, by applying it to find the excited states of the quantum harmonic oscillator problem in 1 dimension. The procedure is inspired by Physics Informed Neural Networks (PINN's), though with a modified residual cost function and an extra cost function ensuring orthogonality between different states.
 
-Our results are compared with a simple finite difference procedure to find the solutions, as well as with the analytical solutions. 
-
+Our results are compared with a simple finite difference procedure to find the solutions, as well as with the analytical solutions.
 
 ## Folder structure
 
 `data/` - Folder containing files with data from grid search analysis
 
-`figs/` - Folder containing figures from the analysis, including the ones found in the report. 
+`figs/` - Folder containing figures from the analysis, including the ones found in the report.
 
 `code/` - Folder with all the code files, including:
 
-- `HO.ipynb` - notebook that finds ground state with neural networks, as well as the first guess for the excited state. 
-- `numHO.ipynb` - notebook that finds the finite difference numerical approximation to the solution, and compares the performance to neural networks. 
-- `param_search.ipynb` - notebook that performs the grid search analysis to find best hyperparameters for the first excited state. Includes also the analysis of the second and third excited states. 
+- `HO.ipynb` - notebook that finds ground state with neural networks, as well as the first guess for the excited state.
+- `numHO.ipynb` - notebook that finds the finite difference numerical approximation to the solution, and compares the performance to neural networks.
 
-- `core/` - Folder containing code for training neural networks, as well as the grid search. It contains: 
+- `param_search.ipynb` - notebook that performs the grid search analysis to find best hyperparameters for the first excited state. Includes also the analysis of the second and third excited states.
 
-- `grid_search.py` - file containing code to perform the finer grid search. 
-- `interfaces.py` - file implementing the skeleton for a physics informed neural network and its cost function. 
-- `neural_network.py` - file implementing a feed forward neural network with PyTorch
-- `training.py` - file defining a function to train the neural network. 
+- `core/` - Folder containing code for training neural networks, as well as the grid search. It contains:
 
-- `param_search/` - Folder containing code to perform the broad search for the best hyperparameters. It contains: 
+  - `grid_search.py` - file containing code to perform the finer grid search.
+  - `interfaces.py` - file implementing the skeleton for a physics informed neural network and its cost function.
+  - `neural_network.py` - file implementing a feed forward neural network with PyTorch
+  - `training.py` - file defining a function to train the neural network.
 
-- `A_train_ground_state.py` - file containing code for training and loading the ground state wavefunction. 
-- `B_broad_sweep_wandb.py` - file containing code for the broad sweep search over different hyperparameters the first excited state
+- `param_search/` - Folder containing code to perform the broad search for the best hyperparameters. It contains:
 
-- `tise1d/` - Folder containing code for the quantum harmonic oscillator problem. It contains: 
+  - `A_train_ground_state.py` - file containing code for training and loading the ground state wavefunction.
+  - `B_broad_sweep_wandb.py` - file containing code for the broad sweep search over different hyperparameters the first excited state
 
-- `analytic_ho.py` - file with functions for the analytical solution to the harmonic oscillator problem, as well as code to compare NN results with the analytical one. 
-- `numerical_ho.py` - file with code for finding the numerical finite difference solution to the Schrödinger equation
-- `tise1d.py` - code implementing a physics informed neural network for the time independent Schrödinger equation, including the desired cost function. 
+- `tise1d/` - Folder containing code for the quantum harmonic oscillator problem. It contains:
 
-- `utils/` - Folder with simple utilities. It contains: 
+  - `analytic_ho.py` - file with functions for the analytical solution to the harmonic oscillator problem, as well as code to compare NN results with the analytical one.
+  - `numerical_ho.py` - file with code for finding the numerical finite difference solution to the Schrödinger equation
+  - `tise1d.py` - code implementing a physics informed neural network for the time independent Schrödinger equation, including the desired cost function.
 
--`cell_magic.py` - file that defines skip_if function
--`plotting.py` - file with code to plot the results of the grid search analysis. 
-- `utils.py` - contains a function to generate data points
+- `utils/` - Folder with simple utilities. It contains:
+
+  - `cell_magic.py` - file that defines skip_if function
+
+  - `plotting.py` - file with code to plot the results of the grid search analysis.
+
+  - `utils.py` - contains a function to generate data points
 
 Notes
 
@@ -64,6 +66,6 @@ Notes
 
 In this project, we have utilized Large Language Models (LLMs) such as ChatGPT to assist with various aspects of project. In particular, it was helpful in the following areas:
 
-- Becoming familiar with how to use the library "pickle" to save Python objects.  
+- Becoming familiar with how to use the library "pickle" to save Python objects.
 
-- Finding some relevant articles about physics informed neural networks, in particular, article [1] and [3] in the report. 
+- Finding some relevant articles about physics informed neural networks, in particular, article [1] and [3] in the report.
