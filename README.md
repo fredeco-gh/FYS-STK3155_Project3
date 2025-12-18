@@ -64,8 +64,6 @@ Notes
 
 In this project, we have utilized Large Language Models (LLMs) such as ChatGPT to assist with various aspects of project. In particular, it was helpful in the following areas:
 
-- Assisting with and understanding LaTeX syntax for the report.
-
 - Becoming familiar with how to use the library "pickle" to save Python objects.  
 
 - Finding some relevant articles about physics informed neural networks, in particular, article [1] and [3] in the report. 
